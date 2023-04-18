@@ -1,5 +1,5 @@
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import React, { useState } from "react";
+import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
+import React, { useRef, useState } from "react";
 import app from "../../firebase/firebase.config";
 import { Link } from "react-router-dom";
 
@@ -8,6 +8,7 @@ const auth = getAuth(app);
 const Login = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const emailRef = useRef();
 
     const handleLogin = event => {
         event.preventDefault();
@@ -43,6 +44,22 @@ const Login = () => {
         });
     }
 
+    const handleResetPassword = event => {
+      const email = emailRef.current.value;
+      if(!email){
+        alert('Please provide your email to reset your password');
+        return;
+      }
+      sendPasswordResetEmail(auth, email)
+      .then(() => {
+        alert('Please check your mail');
+      })
+      .catch(error => {
+        console.log(error);
+        setError(error.message);
+      })
+    }
+
   return (
     <div className="w-25 mx-auto">
         <h2>Please Login</h2>
@@ -55,6 +72,7 @@ const Login = () => {
             className="form-control"
             id="email"
             placeholder="Enter email"
+            ref={emailRef}
             required
           />
         </div>
@@ -73,6 +91,7 @@ const Login = () => {
           Login
         </button>
       </form>
+      <p><small>Forget password? <button className="btn btn-link" onClick={handleResetPassword}>Reset Password</button></small></p>
       <p><small>New to this page? Please <Link to="/register">Register</Link></small></p>
       <p className="text-danger">{error}</p>
       <p className="text-success">{success}</p>

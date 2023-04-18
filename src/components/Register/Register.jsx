@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword, getAuth, sendEmailVerification } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, sendEmailVerification, updateProfile } from "firebase/auth";
 import app from '../../firebase/firebase.config';
 import { Link } from 'react-router-dom';
 
@@ -16,7 +16,8 @@ const Register = () => {
 
         const email = event.target.email.value;
         const password = event.target.password.value;
-        console.log(email, password);
+        const name = event.target.name.value;
+        console.log(email, password, name);
 
         // validation
         if(!/(?=.*[A-Z])/.test(password)){
@@ -32,6 +33,7 @@ const Register = () => {
             event.target.reset()
             setSuccess('User has been registered successfully');
             sendVerificationEmail(result.user);
+            updateUserData(result.user, name)
 
 
         })
@@ -49,6 +51,18 @@ const Register = () => {
         })
     }
 
+    const updateUserData = (user, name) => {
+        updateProfile(user, {
+            displayName: name
+        })
+        .then(() => {
+            console.log('User name updated');
+        })
+        .catch(error => {
+            setError(error.message);
+        })
+    }
+
     const handleEmailChange = (event) => {
         // setEmail(event.target.value);
 
@@ -62,6 +76,8 @@ const Register = () => {
         <div className='w-50 mx-auto'>
             <h2>Register</h2>
             <form onSubmit={handleSubmit}>
+                <input className='w-50 mb-4 rounded' type="text" name="name" id="name" placeholder='Your Name' required/>
+                <br />
                 <input className='w-50 mb-4 rounded' onChange={handleEmailChange} type="email" name="email" id="email" placeholder='Your Email' required/>
                 <br />
                 <input className='w-50 mb-4 rounded' onBlur={handlePasswordBlur} type="password" name="password" id="password" placeholder='Your Password' required/>
